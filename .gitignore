@@ -1,0 +1,42 @@
+# ---- Maven / Java ----
+backend/target/
+*.class
+*.jar
+!**/src/test/resources/**/*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---- Node / Frontend ----
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/coverage/
+frontend/.vite/
+
+# ---- Logs & runtime data ----
+*.log
+logs/
+.repomap/
+
+# ---- Environment / secrets ----
+.env
+.env.local
+.env.*.local
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+.factorypath
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Test artifacts ----
+**/surefire-reports/
+**/failsafe-reports/
