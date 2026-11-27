@@ -6,6 +6,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -21,6 +22,10 @@ import org.springframework.stereotype.Service;
  * <p>Every project lives in its own directory named by an opaque
  * {@code storageKey} under the configured root. Callers only ever handle the
  * key, so absolute server paths never leak into the API or the database.
+ *
+ * <p>Imports are extracted into a sibling {@code <key>.staging} directory and
+ * only swapped into place once extraction succeeded, so a failed or malicious
+ * upload can never corrupt an already-imported repository.
  */
 @Service
 public class StorageService {
@@ -42,14 +47,18 @@ public class StorageService {
      * @throws BadRequestException when the key is malformed (traversal attempt)
      */
     public Path projectRoot(String storageKey) {
-        if (storageKey == null || !STORAGE_KEY.matcher(storageKey).matches()) {
-            throw new BadRequestException("Invalid storage key");
-        }
-        Path resolved = root.resolve(storageKey).normalize();
+        String key = validate(storageKey);
+        Path resolved = root.resolve(key).normalize();
         if (!resolved.startsWith(root)) {
             throw new BadRequestException("Invalid storage key");
         }
         return resolved;
+    }
+
+    /** Scratch directory used while an archive is being extracted. */
+    public Path stagingDirectory(String storageKey) {
+        Path projectRoot = projectRoot(storageKey);
+        return projectRoot.resolveSibling(projectRoot.getFileName().toString() + ".staging");
     }
 
     public boolean projectExists(String storageKey) {
@@ -57,11 +66,34 @@ public class StorageService {
     }
 
     public void ensureProjectDirectory(String storageKey) {
-        try {
-            Files.createDirectories(projectRoot(storageKey));
-        } catch (IOException ex) {
-            throw new UncheckedIOException("Could not create the project storage directory", ex);
+        createDirectories(projectRoot(storageKey));
+    }
+
+    /**
+     * Atomically-ish replaces the project directory with its staging
+     * counterpart. The old tree is only removed once staging is known good.
+     */
+    public void promoteStaging(String storageKey) {
+        Path staging = stagingDirectory(storageKey);
+        if (!Files.exists(staging)) {
+            return;
         }
+        Path projectRoot = projectRoot(storageKey);
+        deleteTree(projectRoot);
+        try {
+            Files.move(staging, projectRoot, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException ex) {
+            // Retry without ATOMIC_MOVE for filesystems that do not support it.
+            try {
+                Files.move(staging, projectRoot, StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException fallback) {
+                throw new UncheckedIOException("Could not finalise the imported project", fallback);
+            }
+        }
+    }
+
+    public void discardStaging(String storageKey) {
+        deleteTree(stagingDirectory(storageKey));
     }
 
     /**
@@ -69,12 +101,19 @@ public class StorageService {
      * resolves outside the storage root. Symbolic links are never followed.
      */
     public void deleteProject(String storageKey) {
-        Path projectRoot = projectRoot(storageKey);
-        if (!Files.exists(projectRoot)) {
+        deleteTree(projectRoot(storageKey));
+    }
+
+    private void deleteTree(Path directory) {
+        if (directory == null || !Files.exists(directory)) {
             return;
         }
+        Path normalized = directory.toAbsolutePath().normalize();
+        if (!normalized.startsWith(root)) {
+            throw new BadRequestException("Refusing to delete outside the storage root");
+        }
         try {
-            Files.walkFileTree(projectRoot, new SimpleFileVisitor<>() {
+            Files.walkFileTree(normalized, new SimpleFileVisitor<>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                     Files.deleteIfExists(file);
@@ -88,9 +127,6 @@ public class StorageService {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    if (!dir.equals(projectRoot) && !dir.startsWith(root)) {
-                        return FileVisitResult.TERMINATE;
-                    }
                     Files.deleteIfExists(dir);
                     return FileVisitResult.CONTINUE;
                 }
@@ -118,6 +154,21 @@ public class StorageService {
             throw new UncheckedIOException(ex);
         }
         return total[0];
+    }
+
+    private static String validate(String storageKey) {
+        if (storageKey == null || !STORAGE_KEY.matcher(storageKey).matches()) {
+            throw new BadRequestException("Invalid storage key");
+        }
+        return storageKey;
+    }
+
+    private void createDirectories(Path directory) {
+        try {
+            Files.createDirectories(directory);
+        } catch (IOException ex) {
+            throw new UncheckedIOException("Could not create the project storage directory", ex);
+        }
     }
 
     public Path getRoot() {

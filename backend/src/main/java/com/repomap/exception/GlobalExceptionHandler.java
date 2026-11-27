@@ -91,9 +91,16 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.BAD_REQUEST, "Malformed request body", request, Map.of());
     }
 
-    @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
-    public ResponseEntity<ApiError> handleMultipart(Exception ex, HttpServletRequest request) {
+    @ExceptionHandler({MaxUploadSizeExceededException.class})
+    public ResponseEntity<ApiError> handleTooLarge(Exception ex, HttpServletRequest request) {
         return respond(HttpStatus.PAYLOAD_TOO_LARGE, "Upload rejected: file or request is too large",
+                request, Map.of());
+    }
+
+    @ExceptionHandler({MultipartException.class,
+            org.springframework.web.multipart.support.MissingServletRequestPartException.class})
+    public ResponseEntity<ApiError> handleMultipart(Exception ex, HttpServletRequest request) {
+        return respond(HttpStatus.BAD_REQUEST, "Upload rejected: the multipart request is malformed or incomplete",
                 request, Map.of());
     }
 

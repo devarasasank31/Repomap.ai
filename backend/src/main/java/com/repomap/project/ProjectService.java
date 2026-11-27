@@ -45,12 +45,30 @@ public class ProjectService {
 
     @Transactional
     public ProjectResponse create(Long ownerId, CreateProjectRequest request) {
+        return ProjectResponse.from(createInternal(ownerId, request.name(), request.description()));
+    }
+
+    /** Creates a project row for the given owner with a fresh storage key. */
+    @Transactional
+    public Project createInternal(Long ownerId, String name, String description) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Owner not found"));
-        Project project = new Project(owner, request.name().trim(), request.description(),
+        Project project = new Project(owner, name == null ? "untitled" : name.trim(), description,
                 storageService.newStorageKey());
         project.transitionTo(ProjectStatus.CREATED);
-        return ProjectResponse.from(projectRepository.save(project));
+        return projectRepository.save(project);
+    }
+
+    /** Loads a project and verifies ownership in a single read. */
+    @Transactional(readOnly = true)
+    public Project loadOwned(Long projectId, Long ownerId) {
+        return requireOwned(projectId, ownerId);
+    }
+
+    /** Merges detached project state (import status transitions). */
+    @Transactional
+    public Project save(Project project) {
+        return projectRepository.save(project);
     }
 
     @Transactional(readOnly = true)

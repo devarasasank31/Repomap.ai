@@ -38,7 +38,7 @@ public final class ProjectDtos {
             Instant createdAt,
             Instant updatedAt) {
 
-        static ProjectResponse from(Project project) {
+        public static ProjectResponse from(Project project) {
             return new ProjectResponse(
                     project.getId(),
                     project.getName(),
@@ -61,7 +61,7 @@ public final class ProjectDtos {
             long id, String path, String directory, String filename, String extension, String language,
             long sizeBytes, int lineCount, boolean analyzed) {
 
-        static ProjectFileResponse from(ProjectFile file) {
+        public static ProjectFileResponse from(ProjectFile file) {
             return new ProjectFileResponse(
                     file.getId(), file.getPath(), file.getDirectory(), file.getFilename(), file.getExtension(),
                     file.getLanguage(), file.getSizeBytes(), file.getLineCount(), file.isAnalyzed());
