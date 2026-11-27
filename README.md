@@ -7,15 +7,25 @@ and run impact analysis — all from a simple web interface.
 
 ## Why RepoMap.ai?
 
-Join any new codebase and spend minutes instead of hours answering the same questions:
+Every developer joining an unfamiliar repository wastes hours on the same questions:
 
-- *What is the structure of this project?*
-- *Where are the API endpoints defined?*
-- *What depends on this file if I change it?*
-- *Which service talks to which repository?*
-- *Where is authentication implemented?*
+- **What is the structure?** — Countless `README.md` files and directory traversals.
+- **Where are the endpoints?** — Hunting through layers of Spring controllers or Express routers.
+- **What depends on this?** — Guessing which services or files will break after a change.
+- **Which code owns that feature?** — Blame messages, outdated wikis, silent assumptions.
 
-RepoMap.ai answers those questions automatically, grounded in real source code.
+RepoMap.ai answers those questions automatically, grounded in real source code rather
+than documentation that falls out of date.
+
+**Import a ZIP of any codebase and instantly get:**
+
+- ✅ Secure extraction with path-traversal protection — no execution, no filesystem leaks
+- ✅ Full file inventory with language detection — know exactly what's in the repo
+- ✅ Symbol and endpoint extraction — classes, methods, HTTP routes, APIs
+- ✅ Code search across all files, symbols, and patterns — find anything, anywhere
+- ✅ Impact analysis before you change anything — see the ripple effect of your changes
+- ✅ Optional AI answers referenced to exact source lines — ask questions and get answers
+  with citations
 
 ## Quick Start
 
@@ -33,31 +43,18 @@ npm install
 npm run dev
 ```
 
-Import a ZIP archive of any source code and instantly get:
-
-- ✅ Secure extraction with path-traversal protection
-- ✅ Full file inventory with language detection
-- ✅ Symbol and endpoint extraction
-- ✅ Search across all code
-- ✅ Impact analysis before you change anything
-- ✅ Optional AI answers grounded in real references
+Import a ZIP archive of any source code and instantly get the features above.
 
 ## Core Features
 
-| Feature | Description |
+| Feature | What It Does |
 |---|---|
-| **Secure Import** | ZIP uploads extracted safely — no path traversal, no code execution |
-| **Dependency Graph** | Auto-detect Maven dependencies, classes, methods, HTTP endpoints |
-| **Code Search** | Find symbols, files, and patterns across the entire repository |
-| **Impact Analysis** | See what breaks before you make a change |
-| **AI Assistant** | Optional AI answers grounded in real source references |
-| **Cross-User Isolation** | Access control ensures users only see their own projects |
-
-## Technology Stack
-
-- **Backend**: Java 21, Spring Boot 3.5, Spring Data JPA, Spring Security, PostgreSQL, Flyway
-- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, React Flow, Lucide
-- **DevOps**: Docker Compose, Maven Wrapper, GitHub Actions compatible
+| **Secure Import** | ZIP uploads extracted safely — no path traversal, no code execution, size/count limits enforced |
+| **Dependency Graph** | Auto-detect Maven dependencies, classes, methods, HTTP endpoints — visualize the connections |
+| **Code Search** | Find symbols, files, and patterns across the entire repository with path and line references |
+| **Impact Analysis** | See what breaks before you make a change — trace dependencies and downstream effects |
+| **AI Assistant** | Optional AI answers grounded in real source references — ask questions and get citations |
+| **Cross-User Isolation** | Access control ensures users only see and import their own projects |
 
 ## License
 
