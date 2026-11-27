@@ -5,11 +5,9 @@
 Import any repository, parse its structure, build a dependency graph, search symbols,
 and run impact analysis — all from a simple web interface.
 
-![Demo](https://repo-map-ai.vercel.app/api/placeholder/800x400/1e293b/64748b?text=RepoMap.ai)
-
 ## Why RepoMap.ai?
 
-Spending hours answering the same questions when joining a new codebase?
+Join any new codebase and spend minutes instead of hours answering the same questions:
 
 - *What is the structure of this project?*
 - *Where are the API endpoints defined?*
@@ -17,7 +15,7 @@ Spending hours answering the same questions when joining a new codebase?
 - *Which service talks to which repository?*
 - *Where is authentication implemented?*
 
-RepoMap.ai answers those questions automatically.
+RepoMap.ai answers those questions automatically, grounded in real source code.
 
 ## Quick Start
 
@@ -42,6 +40,7 @@ Import a ZIP archive of any source code and instantly get:
 - ✅ Symbol and endpoint extraction
 - ✅ Search across all code
 - ✅ Impact analysis before you change anything
+- ✅ Optional AI answers grounded in real references
 
 ## Core Features
 
@@ -66,4 +65,4 @@ MIT
 
 ---
 
-*RepoMap.ai — Understand any repository in minutes, not hours.*
+*Understand any repository in minutes, not hours.*
