@@ -61,6 +61,13 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- AST parsing of imported Java sources; symbol solving is deliberately
+             not used so parsing never needs the project's classpath -->
+        <dependency>
+            <groupId>com.github.javaparser</groupId>
+            <artifactId>javaparser-core</artifactId>
+            <version>${javaparser.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
