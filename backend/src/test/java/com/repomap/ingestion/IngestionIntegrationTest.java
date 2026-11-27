@@ -160,6 +160,29 @@ class IngestionIntegrationTest {
     }
 
     @Test
+    void foreignProjectsCannotBeImported() throws Exception {
+        String ownerToken = register("own");
+        JsonNode project = importArchive(ownerToken, demoArchive(), "demo.zip");
+        long id = project.get("id").asLong();
+
+        String otherToken = register("frn");
+        MockMultipartFile file = new MockMultipartFile("file", "demo.zip", "application/zip", demoArchive());
+        mockMvc.perform(multipart("/api/projects/" + id + "/import").file(file)
+                        .header("Authorization", "Bearer " + otherToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void wrongContentTypeOnImportReturns415() throws Exception {
+        String token = register("ct");
+        mockMvc.perform(post("/api/projects/import")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
+    @Test
     void garbageArchiveIsRejectedAndTrackedAsFailedImport() throws Exception {
         String token = register("bad");
         MockMultipartFile file = new MockMultipartFile(
