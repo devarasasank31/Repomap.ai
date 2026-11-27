@@ -9,12 +9,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
- * Stateless bearer-token security. Authentication itself (issuing and validating
- * tokens) is added in the repository-import phase; this chain establishes the
- * deny-by-default posture for every non-public endpoint from day one.
+ * Stateless bearer-token security. Every non-public endpoint requires a valid
+ * bearer token issued by {@link AuthService}; failures are rendered as JSON
+ * 401/403 payloads.
  */
 @Configuration
 @EnableWebSecurity
@@ -24,14 +25,17 @@ public class SecurityConfig {
     private final JsonAuthenticationEntryPoint authenticationEntryPoint;
     private final JsonAccessDeniedHandler accessDeniedHandler;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final TokenAuthenticationFilter tokenAuthenticationFilter;
 
     public SecurityConfig(
             JsonAuthenticationEntryPoint authenticationEntryPoint,
             JsonAccessDeniedHandler accessDeniedHandler,
-            CorsConfigurationSource corsConfigurationSource) {
+            CorsConfigurationSource corsConfigurationSource,
+            TokenAuthenticationFilter tokenAuthenticationFilter) {
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
         this.corsConfigurationSource = corsConfigurationSource;
+        this.tokenAuthenticationFilter = tokenAuthenticationFilter;
     }
 
     @Bean
@@ -53,6 +57,7 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)

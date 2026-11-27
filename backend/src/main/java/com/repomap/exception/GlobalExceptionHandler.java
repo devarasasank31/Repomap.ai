@@ -43,6 +43,16 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.BAD_REQUEST, ex.getMessage(), request, Map.of());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiError> handleConflict(ConflictException ex, HttpServletRequest request) {
+        return respond(HttpStatus.CONFLICT, ex.getMessage(), request, Map.of());
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex, HttpServletRequest request) {
+        return respond(HttpStatus.UNAUTHORIZED, ex.getMessage(), request, Map.of());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         Map<String, String> fields = new LinkedHashMap<>();
