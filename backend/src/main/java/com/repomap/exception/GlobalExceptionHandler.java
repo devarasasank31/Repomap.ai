@@ -104,6 +104,21 @@ public class GlobalExceptionHandler {
                 request, Map.of());
     }
 
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiError> handleUnsupportedMediaType(
+            org.springframework.web.HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
+        return respond(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "Content-Type '" + ex.getContentType() + "' is not supported for this endpoint",
+                request, Map.of());
+    }
+
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotAcceptableException.class)
+    public ResponseEntity<ApiError> handleNotAcceptable(
+            org.springframework.web.HttpMediaTypeNotAcceptableException ex, HttpServletRequest request) {
+        return respond(HttpStatus.NOT_ACCEPTABLE, "No acceptable representation could be produced",
+                request, Map.of());
+    }
+
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleMethodNotSupported(
             HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {

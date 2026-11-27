@@ -1,6 +1,7 @@
 package com.repomap.exception;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,6 +50,11 @@ class GlobalExceptionHandlerTest {
         @GetMapping("/unreadable")
         public String unreadable() {
             throw new HttpMessageNotReadableException("broken json");
+        }
+
+        @PostMapping(path = "/upload", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+        public String upload() {
+            return "ok";
         }
 
         @PostMapping("/validated")
@@ -110,6 +116,17 @@ class GlobalExceptionHandlerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Validation failed"))
                 .andExpect(jsonPath("$.details.name").exists());
+    }
+
+    @Test
+    void unsupportedContentTypeReturns415() throws Exception {
+        mockMvc.perform(post("/probe/upload")
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isUnsupportedMediaType())
+                .andExpect(jsonPath("$.status").value(415))
+                .andExpect(jsonPath("$.message").value(
+                        org.hamcrest.Matchers.containsString("not supported")));
     }
 
     @Test
