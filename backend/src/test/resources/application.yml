@@ -1,0 +1,45 @@
+# Test classpath overrides the main application.yml so unit/integration tests
+# never require a running PostgreSQL container.
+spring:
+  application:
+    name: repomap-test
+  datasource:
+    url: jdbc:h2:mem:repomap;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+repomap:
+  cors:
+    allowed-origins: http://localhost:5173
+  storage:
+    root: ${java.io.tmpdir}/repomap-tests
+  limits:
+    max-upload-bytes: 10485760
+    max-extracted-files: 500
+    max-extracted-bytes: 52428800
+    max-single-file-bytes: 1048576
+    max-compression-ratio: 100
+  security:
+    token-ttl-hours: 1
+
+logging:
+  level:
+    root: WARN
+    com.repomap: INFO
+    org.flywaydb: INFO
