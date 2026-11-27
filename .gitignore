@@ -40,3 +40,4 @@ desktop.ini
 # ---- Test artifacts ----
 **/surefire-reports/
 **/failsafe-reports/
+*.tsbuildinfo
